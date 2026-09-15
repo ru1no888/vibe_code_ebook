@@ -1,4 +1,4 @@
-export type ProductCategory = 'ebook' | 'template' | 'code' | 'uikit';
+export type ProductCategory = 'mediaplayer' | 'tarot' | 'taskmanager' | 'ebook';
 
 export interface Author {
   name: string;

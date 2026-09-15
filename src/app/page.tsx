@@ -22,15 +22,17 @@ import {
   Layers,
   Code,
   Layout,
+  Music,
+  CreditCard,
+  CheckSquare,
   ExternalLink
 } from 'lucide-react';
 
 const CATEGORIES: { id: ProductCategory | 'all'; label: string; icon: any }[] = [
-  { id: 'all', label: 'ทั้งหมด (All)', icon: Layers },
-  { id: 'ebook', label: 'E-Book หนังสือดิจิทัล', icon: BookOpen },
-  { id: 'template', label: 'Notion Template', icon: Layout },
-  { id: 'code', label: 'Source Code', icon: Code },
-  { id: 'uikit', label: 'UI & Design Assets', icon: Sparkles },
+  { id: 'all', label: 'ทั้งหมด (All 3 Projects)', icon: Layers },
+  { id: 'mediaplayer', label: 'งานที่ 1: ฟังเพลง (Media Player)', icon: Music },
+  { id: 'tarot', label: 'งานที่ 2: ดูไพ่ทาโรต์ (Tarot App)', icon: Sparkles },
+  { id: 'taskmanager', label: 'งานที่ 3: จัดการงาน (Task Manager)', icon: CheckSquare },
 ];
 
 export default function HomePage() {

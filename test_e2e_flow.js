@@ -22,18 +22,15 @@ function assert(condition, testName) {
 // 1. Verify products catalog
 const productsFile = fs.readFileSync(path.join(__dirname, 'src/data/products.ts'), 'utf-8');
 assert(productsFile.includes('PRODUCTS'), 'Product catalog data source exists');
-assert(productsFile.includes('Vibe Coding with Modern AI'), 'At least 1 core Vibe coding e-book is defined');
-assert(productsFile.includes('Full-Stack Next.js & Supabase Mastery'), 'At least 2nd e-book defined');
-assert(productsFile.includes('Clean Architecture & Pragmatic Microservices'), 'At least 3rd e-book defined (Requirement: at least 3)');
+assert(productsFile.includes('Media Player PRO'), 'Assignment 1 (ฟังเพลง Media Player PRO) defined');
+assert(productsFile.includes('Tarot App PRO'), 'Assignment 2 (ดูไพ่ทาโรต์ Tarot App PRO) defined');
+assert(productsFile.includes('SQLite Task Manager PRO'), 'Assignment 3 (จัดการงาน SQLite Task Manager PRO) defined');
 
-// 2. Verify Sample Downloads
+// 2. Verify Sample Downloads for 3 assignments
 const sampleFiles = [
-  'Vibe-Coding-Modern-AI-Guide.pdf',
-  'Nextjs-Supabase-Mastery.pdf',
-  'Clean-Architecture-Pragmatic.pdf',
-  'Second-Brain-Notion-Setup.zip',
-  'nextjs-saas-starter-kit.zip',
-  'CyberVibe-Design-System.fig',
+  'MediaPlayerPRO-Cyberpunk-Guide.pdf',
+  'TarotApp-PRO-Spread-Guide.pdf',
+  'SQLite-TaskManager-PRO-Guide.pdf',
 ];
 
 sampleFiles.forEach((file) => {
