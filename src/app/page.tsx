@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   BookOpen,
@@ -18,7 +19,7 @@ import {
   Star,
 } from 'lucide-react';
 import { PRODUCTS } from '@/data/products';
-import { addToCart } from '@/lib/storage';
+import { addToCart, openCartDrawer } from '@/lib/storage';
 import { formatPrice } from '@/lib/utils';
 import { Product, ProductCategory } from '@/types';
 
@@ -51,10 +52,18 @@ export default function HomePage() {
     });
   }, [selectedCategory, searchQuery]);
 
-  const addProduct = (product: Product) => {
+  const router = useRouter();
+
+  const handleAddToCart = (product: Product) => {
     addToCart(product);
-    setToastMessage(`เพิ่ม “${product.title}” แล้ว`);
+    setToastMessage(`เพิ่ม “${product.title}” ลงในตะกร้าแล้ว`);
+    openCartDrawer();
     window.setTimeout(() => setToastMessage(null), 2600);
+  };
+
+  const handleBuyNow = (product: Product) => {
+    addToCart(product);
+    router.push('/checkout');
   };
 
   return (
@@ -185,11 +194,38 @@ export default function HomePage() {
                     <Link href={`/product/${product.id}`} className="hover:text-[#a54727]">{product.title}</Link>
                   </h3>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#667779]">{product.description}</p>
-                  <div className="mt-auto flex items-end justify-between gap-3 border-t border-[#e3dacb] pt-4">
-                    <div><p className="text-xs text-[#71807e]">ราคา Demo</p><p className="text-xl font-black text-[#102a2f]">{formatPrice(product.price)}</p></div>
-                    <div className="flex gap-2">
-                      <Link href={`/product/${product.id}`} aria-label={`ดูรายละเอียด ${product.title}`} className="button-secondary !min-h-10 !px-3"><ExternalLink className="h-4 w-4" /></Link>
-                      <button type="button" onClick={() => addProduct(product)} className="button-primary !min-h-10 !px-3"><ShoppingBag className="h-4 w-4" /> สั่งซื้อ</button>
+                  <div className="mt-auto border-t border-[#e3dacb] pt-4 space-y-3">
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <p className="text-xs text-[#71807e]">ราคา Demo</p>
+                        <p className="text-xl font-black text-[#102a2f]">{formatPrice(product.price)}</p>
+                      </div>
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#a54727] hover:underline"
+                      >
+                        ดูรายละเอียด <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(product)}
+                        className="button-secondary !min-h-10 !px-2.5 !text-xs sm:!text-sm flex items-center justify-center gap-1.5"
+                        title="เพิ่มเล่มนี้ลงตะกร้าและเปิดตะกร้าทันที"
+                      >
+                        <ShoppingBag className="h-4 w-4 text-[#c85f35]" />
+                        <span>ใส่ตะกร้า</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBuyNow(product)}
+                        className="button-primary !min-h-10 !px-2.5 !text-xs sm:!text-sm flex items-center justify-center gap-1.5"
+                        title="สั่งซื้อเล่มนี้ทันที ไปหน้า Checkout"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                        <span>สั่งซื้อทันที</span>
+                      </button>
                     </div>
                   </div>
                 </div>

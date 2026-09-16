@@ -31,10 +31,17 @@ export default function Navbar() {
       refreshState();
     };
 
+    const handleOpenCart = () => {
+      refreshState();
+      setIsCartOpen(true);
+    };
+
     window.addEventListener('vibe-storage-updated', handleStorageChange);
+    window.addEventListener('vibe-open-cart', handleOpenCart);
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('vibe-storage-updated', handleStorageChange);
+      window.removeEventListener('vibe-open-cart', handleOpenCart);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);

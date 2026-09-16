@@ -78,6 +78,9 @@ const cssFile = fs.readFileSync(path.join(__dirname, 'src/app/globals.css'), 'ut
 assert(layoutFile.includes('href="#main-content"') && layoutFile.includes('id="main-content"'), 'Layout provides a keyboard skip link');
 assert(homeFile.includes('aria-label="ค้นหาหนังสือ"'), 'Catalog search has an accessible name');
 assert(homeFile.includes('role="status"') && homeFile.includes('aria-live="polite"'), 'Cart toast is announced to assistive technology');
+assert(homeFile.includes('สั่งซื้อทันที') && homeFile.includes('ใส่ตะกร้า'), 'Home catalog cards provide both instant checkout and add-to-cart actions');
+assert(navFile.includes('vibe-open-cart'), 'Navbar listens to vibe-open-cart to reveal the CartDrawer');
+assert(storageFile.includes('openCartDrawer'), 'Storage module exports openCartDrawer helper');
 assert(navFile.includes('aria-expanded={mobileMenuOpen}') && navFile.includes("'ปิดเมนูหลัก' : 'เปิดเมนูหลัก'"), 'Mobile navigation exposes its state and name');
 assert(cartFile.includes('role="dialog"') && cartFile.includes('aria-modal="true"'), 'Cart drawer is exposed as a modal dialog');
 assert(cssFile.includes('@media (prefers-reduced-motion: reduce)'), 'Animations respect reduced-motion preferences');

@@ -223,15 +223,21 @@ export function saveCart(items: CartItem[]): void {
   saveToStorage(CART_STORAGE_KEY, items);
 }
 
+export function openCartDrawer(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('vibe-open-cart'));
+  }
+}
+
 export function addToCart(product: CartItem['product']): CartItem[] {
   const cart = getCart();
   const existing = cart.find((item) => item.product.id === product.id);
 
   let updated: CartItem[];
   if (existing) {
-    // For digital products, quantity is usually 1, but we allow increment or keep as 1
+    // For digital products (E-books), 1 copy per customer order is standard; keep quantity as 1
     updated = cart.map((item) =>
-      item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      item.product.id === product.id ? { ...item, quantity: 1 } : item
     );
   } else {
     updated = [...cart, { product, quantity: 1 }];

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getCart, createOrder, clearCart } from '@/lib/storage';
+import { getCart, createOrder, clearCart, removeFromCart } from '@/lib/storage';
 import { PRODUCTS } from '@/data/products';
 import { CartItem } from '@/types';
 import { formatPrice } from '@/lib/utils';
@@ -18,7 +18,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowRight,
-  ShoppingBag
+  ShoppingBag,
+  Trash2
 } from 'lucide-react';
 
 export default function CheckoutPage() {
@@ -30,14 +31,28 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
+  const syncCart = () => {
     const currentCart = getCart();
-    // If cart is empty, pre-select the first product for easy testing
     if (currentCart.length === 0 && PRODUCTS.length > 0) {
       setCart([{ product: PRODUCTS[0], quantity: 1 }]);
     } else {
       setCart(currentCart);
     }
+  };
+
+  useEffect(() => {
+    syncCart();
+
+    const handleStorageChange = () => {
+      syncCart();
+    };
+
+    window.addEventListener('vibe-storage-updated', handleStorageChange);
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('vibe-storage-updated', handleStorageChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const totalAmount = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -256,6 +271,16 @@ export default function CheckoutPage() {
                       {formatPrice(item.product.price)}
                     </span>
                   </div>
+                  {cart.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.product.id)}
+                      className="p-1 text-gray-400 hover:text-rose-400 transition-colors"
+                      title="ลบเล่มนี้ออกจากรายการสั่งซื้อ"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

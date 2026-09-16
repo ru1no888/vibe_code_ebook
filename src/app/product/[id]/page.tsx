@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProductById } from '@/data/products';
 import { formatPrice } from '@/lib/utils';
-import { addToCart } from '@/lib/storage';
+import { addToCart, openCartDrawer } from '@/lib/storage';
 import { 
   ArrowLeft, 
   ShoppingBag, 
@@ -47,6 +47,7 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     addToCart(product);
     showToast(`เพิ่ม "${product.title}" ลงในตะกร้าแล้ว`);
+    openCartDrawer();
   };
 
   const handleBuyNow = () => {
