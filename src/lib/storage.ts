@@ -1,8 +1,10 @@
 import { Order, CartItem, EmailNotification, OrderStatus } from '@/types';
+import { createAccessToken, hasOrderAccess, canDownloadOrder } from './order-security.mjs';
 
 const ORDERS_STORAGE_KEY = 'vibe_store_orders_v1';
 const CART_STORAGE_KEY = 'vibe_store_cart_v1';
 const EMAILS_STORAGE_KEY = 'vibe_store_simulated_emails_v1';
+const ORDER_LOOKUP_ERROR = 'ไม่พบคำสั่งซื้อจากข้อมูลที่ระบุ กรุณาตรวจสอบเลขที่คำสั่งซื้อและอีเมลอีกครั้ง';
 
 // Seed demo orders for testing order tracking out of the box if needed
 const INITIAL_DEMO_ORDERS: Order[] = [
@@ -74,7 +76,7 @@ export function generateOrderId(): string {
 
 // Generate secure temporary download token
 export function generateDownloadToken(): string {
-  return 'dl_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now().toString(36);
+  return createAccessToken();
 }
 
 // ==================== ORDER OPERATIONS ====================
@@ -86,6 +88,15 @@ export function getAllOrders(): Order[] {
 export function getOrderById(orderId: string): Order | null {
   const orders = getAllOrders();
   return orders.find((o) => o.id.trim().toUpperCase() === orderId.trim().toUpperCase()) || null;
+}
+
+export function getAuthorizedOrder(orderId: string, accessToken: string): Order | null {
+  const order = getOrderById(orderId);
+  return hasOrderAccess(order, accessToken) ? order : null;
+}
+
+export function canDownload(order: Order, accessToken: string): boolean {
+  return canDownloadOrder(order, accessToken);
 }
 
 /**
@@ -111,18 +122,12 @@ export function verifyAndGetOrder(
   const foundOrder = orders.find((o) => o.id.toUpperCase() === cleanOrderId);
 
   if (!foundOrder) {
-    return {
-      success: false,
-      error: `ไม่พบคำสั่งซื้อหมายเลข "${orderId}" ในระบบ กรุณาตรวจสอบความถูกต้อง`,
-    };
+    return { success: false, error: ORDER_LOOKUP_ERROR };
   }
 
   // Strictly verify email to prevent unauthorized data exposure!
   if (foundOrder.customerEmail.trim().toLowerCase() !== cleanEmail) {
-    return {
-      success: false,
-      error: '🔒 การยืนยันตัวตนไม่ผ่าน: อีเมลที่ระบุไม่ตรงกับอีเมลในคำสั่งซื้อนี้ (เพื่อความปลอดภัยของข้อมูลลูกค้า)',
-    };
+    return { success: false, error: ORDER_LOOKUP_ERROR };
   }
 
   return { success: true, order: foundOrder };

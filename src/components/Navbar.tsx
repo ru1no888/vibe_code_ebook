@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, ShoppingBag, Mail, Search, Menu, X, ShieldCheck, Sparkles } from 'lucide-react';
+import { BookOpen, ShoppingBag, Mail, Menu, X } from 'lucide-react';
 import { getCart, removeFromCart, getSimulatedEmails } from '@/lib/storage';
 import { CartItem } from '@/types';
 import CartDrawer from './CartDrawer';
@@ -48,26 +48,26 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-[37px] z-40 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/80">
+      <nav aria-label="เมนูหลัก" className="sticky top-0 z-40 border-b border-[#d9cfbf] bg-[#f4efe5]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-400 flex items-center justify-center text-white shadow-glow group-hover:scale-105 transition-transform">
+              <Link href="/" className="group flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#102a2f] text-[#fffdf8] transition-transform group-hover:-rotate-3">
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-indigo-300 transition-colors">
-                      VIBE STORE
+                    <span className="text-base font-black tracking-tight text-[#102a2f] transition-colors group-hover:text-[#a54727] sm:text-lg">
+                      VIBE BOOKS
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                      PRO
+                    <span className="rounded border border-[#d5b49f] bg-[#f6e6dc] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-[#a54727]">
+                      DEMO
                     </span>
                   </div>
-                  <span className="text-[10px] text-gray-400 tracking-wide">
-                    Digital Product & E-Book
+                  <span className="text-[10px] tracking-wide text-[#667779]">
+                    E-books from real projects
                   </span>
                 </div>
               </Link>
@@ -79,8 +79,8 @@ export default function Navbar() {
                 href="/"
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === '/'
-                    ? 'text-white bg-gray-800/80'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+                    ? 'bg-[#102a2f] text-white'
+                    : 'text-[#4f6264] hover:bg-[#e8dfd0] hover:text-[#102a2f]'
                 }`}
               >
                 หน้าร้านค้า
@@ -89,8 +89,8 @@ export default function Navbar() {
                 href="/track-order"
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === '/track-order'
-                    ? 'text-white bg-gray-800/80'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+                    ? 'bg-[#102a2f] text-white'
+                    : 'text-[#4f6264] hover:bg-[#e8dfd0] hover:text-[#102a2f]'
                 }`}
               >
                 🔍 ติดตามคำสั่งซื้อ
@@ -102,13 +102,13 @@ export default function Navbar() {
               {/* Simulated Inbox button */}
               <button
                 onClick={() => setIsInboxOpen(true)}
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 text-xs sm:text-sm font-medium transition-colors"
+                className="relative flex items-center gap-1.5 rounded-lg border border-[#bfc5bd] bg-[#fffdf8] px-3 py-2 text-xs font-bold text-[#334b4f] transition-colors hover:border-[#8b9996] sm:text-sm"
                 title="เปิดดูกล่องจดหมายจำลองสำหรับการส่งอีเมล"
               >
-                <Mail className="w-4 h-4 text-indigo-400" />
+                <Mail className="h-4 w-4 text-[#a54727]" />
                 <span className="hidden sm:inline">กล่องอีเมลจำลอง</span>
                 {inboxCount > 0 && (
-                  <span className="bg-indigo-600 text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+                  <span className="min-w-[18px] rounded-full bg-[#102a2f] px-1.5 py-0.5 text-center text-[10px] font-black text-white">
                     {inboxCount}
                   </span>
                 )}
@@ -117,13 +117,13 @@ export default function Navbar() {
               {/* Cart button */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-glow"
+                className="relative flex items-center gap-1.5 rounded-lg bg-[#c85f35] px-3 py-2 text-xs font-extrabold text-white transition-colors hover:bg-[#a54727] sm:text-sm"
                 title="เปิดตะกร้าสินค้า"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span className="hidden sm:inline">ตะกร้า</span>
                 {totalCartCount > 0 && (
-                  <span className="bg-white text-indigo-700 text-[11px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+                  <span className="min-w-[18px] rounded-full bg-white px-1.5 py-0.5 text-center text-[10px] font-black text-[#a54727]">
                     {totalCartCount}
                   </span>
                 )}
@@ -132,7 +132,10 @@ export default function Navbar() {
               {/* Mobile menu toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-navigation"
+                aria-label={mobileMenuOpen ? 'ปิดเมนูหลัก' : 'เปิดเมนูหลัก'}
+                className="rounded-lg p-2 text-[#4f6264] hover:bg-[#e8dfd0] hover:text-[#102a2f] md:hidden"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -141,18 +144,18 @@ export default function Navbar() {
 
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-3 border-t border-gray-800 space-y-1">
+            <div id="mobile-navigation" className="space-y-1 border-t border-[#d9cfbf] py-3 md:hidden">
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-gray-800 font-medium"
+                className="block rounded-lg px-3 py-2 text-sm font-bold text-[#334b4f] hover:bg-[#e8dfd0]"
               >
                 หน้าร้านค้าดิจิทัล
               </Link>
               <Link
                 href="/track-order"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-gray-800 font-medium"
+                className="block rounded-lg px-3 py-2 text-sm font-bold text-[#334b4f] hover:bg-[#e8dfd0]"
               >
                 🔍 ติดตามสถานะคำสั่งซื้อ
               </Link>

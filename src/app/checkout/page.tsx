@@ -78,7 +78,7 @@ export default function CheckoutPage() {
       clearCart();
 
       // 3. Redirect to Mock Payment screen
-      router.push(`/payment/${newOrder.id}`);
+      router.push(`/payment/${newOrder.id}?token=${encodeURIComponent(newOrder.downloadToken)}`);
     } catch (err: any) {
       setError('เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง');
       setIsSubmitting(false);
@@ -90,7 +90,7 @@ export default function CheckoutPage() {
       {/* Back button */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-[#66706b] hover:text-[#b44924] transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>เลือกสินค้าเพิ่มเติม</span>
@@ -101,10 +101,10 @@ export default function CheckoutPage() {
         <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block mb-1">
           Step 1 of 2: Checkout & Customer Info
         </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#102f31]">
           ยืนยันการสั่งซื้อสินค้าดิจิทัล
         </h1>
-        <p className="text-xs sm:text-sm text-gray-400 mt-1">
+        <p className="text-xs sm:text-sm text-[#66706b] mt-1">
           กรอกข้อมูลผู้รับเพื่อสร้างหมายเลขคำสั่งซื้อ (สถานะเริ่มต้น: PENDING)
         </p>
       </div>
@@ -128,12 +128,13 @@ export default function CheckoutPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                <label htmlFor="customer-name" className="block text-xs font-medium text-gray-300 mb-1.5">
                   ชื่อ - นามสกุล หรือ นามปากกา <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="customer-name"
                     type="text"
                     required
                     placeholder="เช่น สมชาย ใจดี หรือ DevVibe"
@@ -145,12 +146,13 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                <label htmlFor="customer-email" className="block text-xs font-medium text-gray-300 mb-1.5">
                   อีเมล (สำหรับรับไฟล์และติดตามคำสั่งซื้อ) <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
+                    id="customer-email"
                     type="email"
                     required
                     placeholder="เช่น your-email@example.com"
@@ -175,13 +177,20 @@ export default function CheckoutPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label
-                onClick={() => setPaymentMethod('promptpay')}
                 className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                   paymentMethod === 'promptpay'
                     ? 'bg-indigo-950/60 border-indigo-500 ring-1 ring-indigo-500'
                     : 'bg-gray-900/60 border-gray-800 hover:border-gray-700'
                 }`}
               >
+                <input
+                  type="radio"
+                  name="payment-method"
+                  value="promptpay"
+                  checked={paymentMethod === 'promptpay'}
+                  onChange={() => setPaymentMethod('promptpay')}
+                  className="sr-only"
+                />
                 <QrCode className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -193,13 +202,20 @@ export default function CheckoutPage() {
               </label>
 
               <label
-                onClick={() => setPaymentMethod('credit_card')}
                 className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                   paymentMethod === 'credit_card'
                     ? 'bg-indigo-950/60 border-indigo-500 ring-1 ring-indigo-500'
                     : 'bg-gray-900/60 border-gray-800 hover:border-gray-700'
                 }`}
               >
+                <input
+                  type="radio"
+                  name="payment-method"
+                  value="credit_card"
+                  checked={paymentMethod === 'credit_card'}
+                  onChange={() => setPaymentMethod('credit_card')}
+                  className="sr-only"
+                />
                 <CreditCard className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <div className="flex items-center gap-1.5">

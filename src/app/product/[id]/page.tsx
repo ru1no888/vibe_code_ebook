@@ -31,8 +31,8 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-white">ไม่พบสินค้านี้ในระบบ</h2>
-        <p className="text-gray-400 text-sm">สินค้าอาจถูกย้ายหรือไม่มีอยู่ในระบบแล้ว</p>
+        <h2 className="text-2xl font-bold text-[#102f31]">ไม่พบสินค้านี้ในระบบ</h2>
+        <p className="text-[#66706b] text-sm">สินค้าอาจถูกย้ายหรือไม่มีอยู่ในระบบแล้ว</p>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors"
@@ -74,7 +74,7 @@ export default function ProductDetailPage() {
       {/* Back button */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-[#66706b] hover:text-[#b44924] transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>กลับไปหน้าร้านค้า</span>
@@ -131,11 +131,11 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#102f31] tracking-tight leading-snug">
               {product.title}
             </h1>
 
-            <p className="mt-4 text-sm sm:text-base text-gray-300 leading-relaxed">
+            <p className="mt-4 text-sm sm:text-base text-[#66706b] leading-relaxed">
               {product.fullDescription}
             </p>
           </div>
@@ -195,7 +195,7 @@ export default function ProductDetailPage() {
 
           {/* Key Features list */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#102f31] flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-indigo-400" />
               จุดเด่นและสิ่งที่จะได้รับในชุดนี้
             </h3>
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
           {/* Table of contents if available */}
           {product.tableOfContents && product.tableOfContents.length > 0 && (
             <div className="space-y-4 pt-4 border-t border-gray-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-[#102f31] flex items-center gap-2">
                 <FileText className="w-4 h-4 text-indigo-400" />
                 สารบัญและเนื้อหาภายในเล่ม (Table of Contents)
               </h3>
@@ -230,7 +230,7 @@ export default function ProductDetailPage() {
           {/* Sample content excerpt */}
           {product.sampleContent && (
             <div className="space-y-3 pt-4 border-t border-gray-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-[#102f31] flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-indigo-400" />
                 ตัวอย่างเนื้อหาทดลองอ่าน (Sample Excerpt)
               </h3>

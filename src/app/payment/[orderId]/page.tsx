@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getOrderById, updateOrderStatus } from '@/lib/storage';
+import { getAuthorizedOrder, updateOrderStatus } from '@/lib/storage';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -24,7 +24,9 @@ import {
 export default function MockPaymentPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const orderId = (params?.orderId as string)?.toUpperCase();
+  const accessToken = searchParams.get('token') || '';
 
   const [order, setOrder] = useState<Order | null>(null);
   const [timeLeft, setTimeLeft] = useState(899); // 14:59 minutes
@@ -33,12 +35,12 @@ export default function MockPaymentPage() {
 
   useEffect(() => {
     if (orderId) {
-      const found = getOrderById(orderId);
+      const found = getAuthorizedOrder(orderId, accessToken);
       if (found) {
         setOrder(found);
       }
     }
-  }, [orderId]);
+  }, [orderId, accessToken]);
 
   // Countdown timer
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function MockPaymentPage() {
       const updated = updateOrderStatus(order.id, 'PAID');
       if (updated) {
         // 2. Redirect to success screen
-        router.push(`/order-success/${order.id}`);
+        router.push(`/order-success/${order.id}?token=${encodeURIComponent(order.downloadToken)}`);
       } else {
         setIsProcessing(false);
       }
@@ -92,8 +94,8 @@ export default function MockPaymentPage() {
   if (!order) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-xl font-bold text-white">ไม่พบข้อมูลคำสั่งซื้อ {orderId}</h2>
-        <p className="text-gray-400 text-sm">คำสั่งซื้ออาจยังไม่ได้ถูกสร้าง หรือถูกล้างประวัติ</p>
+        <h2 className="text-xl font-bold text-[#102f31]">ไม่พบข้อมูลคำสั่งซื้อ {orderId}</h2>
+        <p className="text-[#66706b] text-sm">คำสั่งซื้ออาจยังไม่ได้ถูกสร้าง หรือถูกล้างประวัติ</p>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold"
@@ -109,14 +111,14 @@ export default function MockPaymentPage() {
       {/* Back button */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-[#66706b] hover:text-[#b44924] transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>ยกเลิกและกลับหน้าร้าน</span>
       </Link>
 
       {/* Prominent DEMO ONLY Badge */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-amber-200 flex items-start sm:items-center gap-3 shadow-lg">
+      <div className="p-4 rounded-2xl bg-[#fff0d2] border-2 border-[#d97706]/40 text-[#7c3e08] flex items-start sm:items-center gap-3 shadow-lg">
         <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
         <div className="flex-1 text-xs sm:text-sm">
           <span className="font-extrabold text-amber-300 uppercase tracking-wider block sm:inline mr-2 text-sm">

@@ -13,8 +13,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -23,11 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className="dark">
-      <body className="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+    <html lang="th">
+      <body className="min-h-screen flex flex-col antialiased">
+        <a href="#main-content" className="skip-link">ข้ามไปเนื้อหาหลัก</a>
         <DemoBanner />
         <Navbar />
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />

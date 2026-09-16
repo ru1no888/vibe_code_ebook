@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getOrderById, getSimulatedEmails } from '@/lib/storage';
+import { getAuthorizedOrder, getSimulatedEmails, canDownload } from '@/lib/storage';
 import { Order, EmailNotification } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -24,7 +24,9 @@ import SimulatedInboxModal from '@/components/SimulatedInboxModal';
 
 export default function OrderSuccessPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const orderId = (params?.orderId as string)?.toUpperCase();
+  const accessToken = searchParams.get('token') || '';
 
   const [order, setOrder] = useState<Order | null>(null);
   const [sentEmail, setSentEmail] = useState<EmailNotification | null>(null);
@@ -32,8 +34,8 @@ export default function OrderSuccessPage() {
 
   useEffect(() => {
     if (orderId) {
-      const found = getOrderById(orderId);
-      if (found) {
+      const found = getAuthorizedOrder(orderId, accessToken);
+      if (found?.status === 'PAID') {
         setOrder(found);
 
         // Find corresponding email
@@ -55,12 +57,12 @@ export default function OrderSuccessPage() {
     } catch {
       // ignore
     }
-  }, [orderId]);
+  }, [orderId, accessToken]);
 
   if (!order) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-xl font-bold text-white">ไม่พบคำสั่งซื้อ {orderId}</h2>
+        <h2 className="text-xl font-bold text-[#102f31]">ไม่พบคำสั่งซื้อ {orderId}</h2>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold"
@@ -162,14 +164,18 @@ export default function OrderSuccessPage() {
               </div>
 
               {/* Instant Download Button */}
-              <a
-                href={`/sample-downloads/${item.product.downloadFileName}`}
-                download={item.product.downloadFileName}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm shadow-glow flex items-center justify-center gap-2 transition-all hover:scale-105"
-              >
-                <Download className="w-4 h-4" />
-                <span>ดาวน์โหลดไฟล์ ({item.product.downloadFileName.split('.').pop()?.toUpperCase()})</span>
-              </a>
+              {canDownload(order, order.downloadToken) ? (
+                <a
+                  href={`/sample-downloads/${item.product.downloadFileName}`}
+                  download={item.product.downloadFileName}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm shadow-glow flex items-center justify-center gap-2 transition-all hover:scale-105"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>ดาวน์โหลดไฟล์ ({item.product.downloadFileName.split('.').pop()?.toUpperCase()})</span>
+                </a>
+              ) : (
+                <span className="text-xs font-semibold text-amber-300">ลิงก์ดาวน์โหลดหมดอายุแล้ว</span>
+              )}
             </div>
           ))}
         </div>
@@ -204,7 +210,7 @@ export default function OrderSuccessPage() {
         {/* Bottom Actions */}
         <div className="pt-4 flex flex-wrap items-center justify-between gap-4">
           <Link
-            href={`/track-order?orderId=${order.id}&email=${encodeURIComponent(order.customerEmail)}`}
+            href={`/track-order?orderId=${order.id}`}
             className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-medium"
           >
             <span>เปิดหน้าติดตามคำสั่งซื้อนี้อีกครั้ง</span>

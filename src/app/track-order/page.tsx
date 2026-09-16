@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { verifyAndGetOrder } from '@/lib/storage';
+import { verifyAndGetOrder, canDownload } from '@/lib/storage';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -61,12 +61,13 @@ function TrackOrderContent() {
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              <label htmlFor="order-id" className="block text-xs font-semibold text-gray-300 mb-1.5">
                 หมายเลขคำสั่งซื้อ (Order ID) <span className="text-red-400">*</span>
               </label>
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
+                  id="order-id"
                   type="text"
                   required
                   placeholder="เช่น ORD-2026-1001"
@@ -78,12 +79,13 @@ function TrackOrderContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              <label htmlFor="order-email" className="block text-xs font-semibold text-gray-300 mb-1.5">
                 อีเมลที่ใช้สั่งซื้อ (Buyer Email) <span className="text-red-400">*</span>
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
+                  id="order-email"
                   type="email"
                   required
                   placeholder="เช่น customer@example.com"
@@ -193,17 +195,21 @@ function TrackOrderContent() {
 
                   {/* If PAID -> Show Download; If PENDING -> Show Payment link */}
                   {order.status === 'PAID' ? (
-                    <a
-                      href={`/sample-downloads/${item.product.downloadFileName}`}
-                      download={item.product.downloadFileName}
-                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-glow transition-all"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>ดาวน์โหลดไฟล์</span>
-                    </a>
+                    canDownload(order, order.downloadToken) ? (
+                      <a
+                        href={`/sample-downloads/${item.product.downloadFileName}`}
+                        download={item.product.downloadFileName}
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-glow transition-all"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>ดาวน์โหลดไฟล์</span>
+                      </a>
+                    ) : (
+                      <span className="text-xs font-semibold text-amber-300">ลิงก์หมดอายุ</span>
+                    )
                   ) : (
                     <Link
-                      href={`/payment/${order.id}`}
+                      href={`/payment/${order.id}?token=${encodeURIComponent(order.downloadToken)}`}
                       className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
                     >
                       <span>ไปหน้าชำระเงินจำลอง</span>
@@ -229,10 +235,10 @@ export default function TrackOrderPage() {
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Privacy-First Order Verification System</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-[#102f31]">
           ติดตามสถานะคำสั่งซื้อ & ดาวน์โหลดไฟล์
         </h1>
-        <p className="text-xs sm:text-sm text-gray-400 max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-[#66706b] max-w-xl mx-auto">
           เพื่อความปลอดภัยของข้อมูลและป้องกันการเข้าถึงของบุคคลอื่น ระบบกำหนดให้ระบุทั้ง <strong>หมายเลขคำสั่งซื้อ</strong> และ <strong>อีเมลที่ใช้สั่งซื้อ</strong> ที่ตรงกันเท่านั้น
         </p>
       </div>
