@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getAuthorizedOrder, getSimulatedEmails, canDownload } from '@/lib/storage';
+import { getAuthorizedOrder, getSimulatedEmails, canDownload, generateMailtoLink } from '@/lib/storage';
 import { Order, EmailNotification } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -109,12 +109,21 @@ export default function OrderSuccessPage() {
             </div>
           </div>
 
-          <button
-            onClick={() => setIsInboxOpen(true)}
-            className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shrink-0 transition-colors shadow-sm"
-          >
-            เปิดดูอีเมลจำลอง 📩
-          </button>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <a
+              href={generateMailtoLink(order)}
+              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors shadow-sm flex items-center gap-1"
+              title="เปิดในแอป Mail เพื่อส่งเข้ากล่องจดหมายจริงของคุณ"
+            >
+              <span>ส่งเข้าแอป Mail ✉️</span>
+            </a>
+            <button
+              onClick={() => setIsInboxOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shadow-sm"
+            >
+              เปิดดูอีเมลจำลอง 📩
+            </button>
+          </div>
         </div>
       </div>
 

@@ -210,7 +210,86 @@ export function createAndSaveEmailNotification(order: Order): EmailNotification 
 
   const existingEmails = getSimulatedEmails();
   saveToStorage(EMAILS_STORAGE_KEY, [emailLog, ...existingEmails]);
+
+  // Also trigger API route to dispatch real email if server environment is configured
+  if (typeof window !== 'undefined') {
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: order.customerEmail,
+        customerName: order.customerName,
+        orderId: order.id,
+        downloadUrl,
+        items: emailLog.items,
+        totalAmount: order.totalAmount,
+      }),
+    }).catch((err) => {
+      console.warn('API send-email background call:', err);
+    });
+  }
+
   return emailLog;
+}
+
+/**
+ * Generate native mailto: URL with full order confirmation and download link
+ * Allows instant opening in Gmail / Outlook / Apple Mail on mobile or desktop
+ */
+export function generateMailtoLink(order: Order): string {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const downloadUrl = `${baseUrl}/order-success/${order.id}?token=${order.downloadToken}`;
+  const subject = encodeURIComponent(`[Vibe Store] ยืนยันคำสั่งซื้อ #${order.id} และลิงก์ดาวน์โหลด E-Book`);
+  const body = encodeURIComponent(
+    `เรียนคุณ ${order.customerName},\n\n` +
+      `ขอบคุณสำหรับการสั่งซื้อ E-Book จาก Vibe Coding Digital Store\n\n` +
+      `หมายเลขคำสั่งซื้อ: #${order.id}\n` +
+      `ยอดรวมทั้งสิ้น: ${order.totalAmount} บาท\n\n` +
+      `รายการสินค้าดิจิทัล:\n` +
+      order.items.map((i) => `- ${i.product.title} (${i.product.price} บาท)`).join('\n') +
+      `\n\nคลิกที่ลิงก์ด้านล่างเพื่อรับไฟล์ E-Book ของคุณ (อายุการใช้งาน 48 ชม.):\n` +
+      `${downloadUrl}\n\n` +
+      `ขอขอบคุณ,\nVibe Coding Store Team`
+  );
+  return `mailto:${order.customerEmail}?subject=${subject}&body=${body}`;
+}
+
+// ==================== PRODUCT REVIEWS STORAGE ====================
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  authorName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+const REVIEWS_STORAGE_KEY = 'vibe_store_user_reviews_v1';
+
+export function getProductReviews(productId: string): ProductReview[] {
+  const allReviews = getFromStorage<ProductReview[]>(REVIEWS_STORAGE_KEY, []);
+  return allReviews.filter((r) => r.productId === productId);
+}
+
+export function addProductReview(
+  productId: string,
+  authorName: string,
+  rating: number,
+  comment: string
+): ProductReview {
+  const newReview: ProductReview = {
+    id: 'rev_' + Math.random().toString(36).substring(2, 9),
+    productId,
+    authorName: authorName.trim() || 'ผู้อ่าน',
+    rating: Math.max(1, Math.min(5, rating)),
+    comment: comment.trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  const current = getFromStorage<ProductReview[]>(REVIEWS_STORAGE_KEY, []);
+  saveToStorage(REVIEWS_STORAGE_KEY, [newReview, ...current]);
+  return newReview;
 }
 
 // ==================== CART OPERATIONS ====================

@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, ShoppingBag, Mail, Menu, X } from 'lucide-react';
+import { BookOpen, ShoppingBag, Mail, Menu, X, Clock, RefreshCw } from 'lucide-react';
 import { getCart, removeFromCart, getSimulatedEmails } from '@/lib/storage';
+import { initOrGetSession, extendSession, getSessionRemainingSeconds, checkAndEnforceSessionExpiry } from '@/lib/session';
 import { CartItem } from '@/types';
 import CartDrawer from './CartDrawer';
 import SimulatedInboxModal from './SimulatedInboxModal';
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [inboxCount, setInboxCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sessionRemaining, setSessionRemaining] = useState<number>(3600);
 
   const refreshState = () => {
     const currentCart = getCart();
@@ -38,13 +40,35 @@ export default function Navbar() {
 
     window.addEventListener('vibe-storage-updated', handleStorageChange);
     window.addEventListener('vibe-open-cart', handleOpenCart);
-    window.addEventListener('storage', handleStorageChange);
+    initOrGetSession();
+    setSessionRemaining(getSessionRemainingSeconds());
+
+    const sessionInterval = setInterval(() => {
+      const expired = checkAndEnforceSessionExpiry();
+      if (expired) {
+        refreshState();
+      }
+      setSessionRemaining(getSessionRemainingSeconds());
+    }, 1000);
+
     return () => {
+      clearInterval(sessionInterval);
       window.removeEventListener('vibe-storage-updated', handleStorageChange);
       window.removeEventListener('vibe-open-cart', handleOpenCart);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  const formatSessionTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleExtendSession = () => {
+    extendSession();
+    setSessionRemaining(3600);
+  };
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -106,6 +130,18 @@ export default function Navbar() {
 
             {/* Right Action Buttons */}
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Security Session Indicator Pill */}
+              <button
+                type="button"
+                onClick={handleExtendSession}
+                className="hidden lg:flex items-center gap-1.5 rounded-lg border border-[#bfc5bd] bg-[#fffdf8] px-2.5 py-2 text-xs font-bold text-[#334b4f] transition-colors hover:border-[#c85f35] hover:text-[#a54727]"
+                title="ระบบจะรีเซ็ตเซสชันทุก 1 ชม. เพื่อความปลอดภัย คลิกเพื่อต่อเวลา"
+              >
+                <Clock className="h-3.5 w-3.5 text-[#c85f35]" />
+                <span>เซสชัน: {formatSessionTime(sessionRemaining)}</span>
+                <span className="text-[10px] text-[#a54727] underline">ต่ออายุ</span>
+              </button>
+
               {/* Simulated Inbox button */}
               <button
                 onClick={() => setIsInboxOpen(true)}
@@ -166,6 +202,19 @@ export default function Navbar() {
               >
                 🔍 ติดตามสถานะคำสั่งซื้อ
               </Link>
+              <div className="flex items-center justify-between rounded-lg bg-[#e8e0d0] px-3 py-2 text-xs text-[#4f6264]">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Clock className="h-3.5 w-3.5 text-[#c85f35]" />
+                  เซสชันความปลอดภัย: {formatSessionTime(sessionRemaining)}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleExtendSession}
+                  className="font-bold text-[#a54727] underline"
+                >
+                  ต่ออายุ
+                </button>
+              </div>
             </div>
           )}
         </div>

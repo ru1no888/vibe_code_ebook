@@ -19,8 +19,10 @@ import {
   CheckCircle2,
   ArrowRight,
   ShoppingBag,
-  Trash2
+  Trash2,
+  FileCheck
 } from 'lucide-react';
+import TermsModal from '@/components/TermsModal';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,6 +30,9 @@ export default function CheckoutPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'promptpay' | 'credit_card'>('promptpay');
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeDemo, setAgreeDemo] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,6 +80,16 @@ export default function CheckoutPage() {
 
     if (cart.length === 0) {
       setError('ไม่มีสินค้าในรายการสั่งซื้อ');
+      return;
+    }
+
+    if (!agreeTerms) {
+      setError('กรุณาคลิกยอมรับข้อกำหนดและเงื่อนไขการให้บริการก่อนดำเนินการสั่งซื้อ');
+      return;
+    }
+
+    if (!agreeDemo) {
+      setError('กรุณาคลิกยืนยันรับทราบว่าระบบนี้เป็นระบบทดลองและสาธิต (DEMO ONLY)');
       return;
     }
 
@@ -242,6 +257,52 @@ export default function CheckoutPage() {
               </label>
             </div>
           </div>
+
+          {/* Terms & Conditions Acceptance Box */}
+          <div className="glass-panel p-6 rounded-2xl border border-gray-800 space-y-4">
+            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-gray-800 pb-3">
+              <FileCheck className="w-4 h-4 text-indigo-400" />
+              การยอมรับข้อกำหนดและเงื่อนไข (Terms Acceptance)
+            </h3>
+
+            <div className="space-y-3 text-xs sm:text-sm">
+              <label className="flex items-start gap-3 text-gray-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  id="agree-terms"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-700 bg-gray-900 text-indigo-600 focus:ring-indigo-500 shrink-0"
+                  required
+                />
+                <span>
+                  ฉันได้อ่านและยอมรับ{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsTermsOpen(true)}
+                    className="text-indigo-400 hover:text-indigo-300 underline font-bold"
+                  >
+                    ข้อกำหนดและเงื่อนไขการให้บริการ และ นโยบายความเป็นส่วนตัว
+                  </button>{' '}
+                  (สิทธิ์การใช้งานส่วนบุคคล และนโยบายดาวน์โหลด 48 ชม.) <span className="text-red-400">*</span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-gray-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  id="agree-demo"
+                  checked={agreeDemo}
+                  onChange={(e) => setAgreeDemo(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-700 bg-gray-900 text-indigo-600 focus:ring-indigo-500 shrink-0"
+                  required
+                />
+                <span>
+                  ฉันรับทราบและยืนยันว่าการสั่งซื้อนี้เป็น <strong>ระบบทดลองและสาธิต (DEMO ONLY)</strong> ไม่มีการหักเงินจริงใดๆ ทั้งสิ้น <span className="text-red-400">*</span>
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Order Summary */}
@@ -304,12 +365,18 @@ export default function CheckoutPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm sm:text-base shadow-glow flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
+              disabled={isSubmitting || !agreeTerms || !agreeDemo}
+              className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm sm:text-base shadow-glow flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>{isSubmitting ? 'กำลังสร้างคำสั่งซื้อ...' : 'ยืนยันและไปหน้าจำลองชำระเงิน'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            {(!agreeTerms || !agreeDemo) && (
+              <p className="text-center text-[11px] text-amber-400/90">
+                * กรุณาคลิกยอมรับข้อกำหนดและยืนยันระบบ DEMO เพื่อเปิดปุ่มสั่งซื้อ
+              </p>
+            )}
 
             <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/40 text-[11px] text-amber-300 text-center space-y-1">
               <p className="font-semibold uppercase tracking-wider">⚡ แจ้งเตือน: ระบบจำลอง (DEMO ONLY)</p>
@@ -320,6 +387,13 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+
+      {/* Terms & Privacy Policy Modal */}
+      <TermsModal
+        isOpen={isTermsOpen}
+        onClose={() => setIsTermsOpen(false)}
+        onAccept={() => setAgreeTerms(true)}
+      />
     </div>
   );
 }

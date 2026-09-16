@@ -98,6 +98,32 @@ assert(guideContent.includes('CanGoBack') && guideContent.includes('GoBack'), 'G
 const gitignore = fs.readFileSync(path.join(__dirname, '.gitignore'), 'utf-8');
 assert(gitignore.includes('.env.local') && gitignore.includes('.env'), '.gitignore properly excludes all .env files from Git');
 
+// 9. Verify 1-Hour Session Management & Expiry
+const sessionFilePath = path.join(__dirname, 'src/lib/session.ts');
+assert(fs.existsSync(sessionFilePath), 'Session management module (src/lib/session.ts) exists');
+const sessionContent = fs.readFileSync(sessionFilePath, 'utf-8');
+assert(sessionContent.includes('SESSION_DURATION_MS = 60 * 60 * 1000'), 'Session duration set to exactly 1 hour (3,600,000 ms)');
+assert(sessionContent.includes('checkAndEnforceSessionExpiry'), 'Provides session expiry enforcement');
+assert(navFile.includes('เซสชัน:'), 'Navbar exposes active security session time remaining and extension action');
+
+// 10. Verify Terms & Conditions Acceptance
+const termsModalPath = path.join(__dirname, 'src/components/TermsModal.tsx');
+assert(fs.existsSync(termsModalPath), 'TermsModal component exists');
+assert(checkoutFile.includes('agree-terms') && checkoutFile.includes('agree-demo'), 'Checkout requires explicit acceptance of terms and DEMO status');
+assert(checkoutFile.includes('disabled={isSubmitting || !agreeTerms || !agreeDemo}'), 'Checkout submit is disabled until terms are confirmed');
+
+// 11. Verify Email Delivery Integration & Mailto
+const emailRoutePath = path.join(__dirname, 'src/app/api/send-email/route.ts');
+assert(fs.existsSync(emailRoutePath), 'Email dispatch API route (/api/send-email/route.ts) exists');
+assert(storageFile.includes('generateMailtoLink'), 'Storage provides generateMailtoLink for opening in native Mail apps');
+const successFileContent = fs.readFileSync(path.join(__dirname, 'src/app/order-success/[orderId]/page.tsx'), 'utf-8');
+assert(successFileContent.includes('generateMailtoLink'), 'Order success screen includes one-click mail client action');
+
+// 12. Verify Product Reviews & Ratings
+const productPageContent = fs.readFileSync(path.join(__dirname, 'src/app/product/[id]/page.tsx'), 'utf-8');
+assert(productPageContent.includes('addProductReview') && productPageContent.includes('getProductReviews'), 'Product detail page integrates dynamic user reviews');
+assert(storageFile.includes('addProductReview') && storageFile.includes('getProductReviews'), 'Storage module manages dynamic product reviews');
+
 console.log('\n====================================================');
 console.log(`TEST SUMMARY: ${passedTests}/${totalTests} TESTS PASSED (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================');
