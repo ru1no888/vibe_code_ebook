@@ -33,7 +33,7 @@ function TrackOrderContent() {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
     setHasSearched(true);
@@ -43,6 +43,17 @@ function TrackOrderContent() {
       setOrder(result.order);
       setError(null);
     } else {
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId.trim())}?email=${encodeURIComponent(email.trim())}`);
+        const data = await res.json();
+        if (data.success && data.order) {
+          setOrder(data.order);
+          setError(null);
+          return;
+        }
+      } catch {
+        // fallback
+      }
       setOrder(null);
       setError(result.error || 'ไม่พบข้อมูลคำสั่งซื้อ');
     }

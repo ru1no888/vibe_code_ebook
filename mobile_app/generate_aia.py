@@ -34,7 +34,7 @@ theme=AppTheme.Light.DarkActionBar
         "$Type": "WebViewer",
         "$Name": "WebViewer1",
         "$Version": "10",
-        "HomeUrl": "https://vibe-digital-store.vercel.app",
+        "HomeUrl": "https://vibe-book.me",
         "Width": -2,
         "Height": -2,
         "FollowLinks": true,

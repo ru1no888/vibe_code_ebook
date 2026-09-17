@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getAuthorizedOrder, getOrderById, getSimulatedEmails, canDownload, generateMailtoLink } from '@/lib/storage';
+import { getAuthorizedOrder, getOrderById, getSimulatedEmails, canDownload, generateMailtoLink, fetchOrderFromCentralDb } from '@/lib/storage';
 import { Order, EmailNotification } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -54,8 +54,19 @@ function OrderSuccessContent() {
           // If still PENDING, redirect to payment screen so customer can simulate payment
           router.replace(`/payment/${found.id}?token=${encodeURIComponent(found.downloadToken)}`);
         }
+        setIsLoading(false);
+      } else {
+        fetchOrderFromCentralDb(orderId).then((dbOrder) => {
+          if (dbOrder) {
+            if (dbOrder.status === 'PAID') {
+              setOrder(dbOrder);
+            } else {
+              router.replace(`/payment/${dbOrder.id}?token=${encodeURIComponent(dbOrder.downloadToken)}`);
+            }
+          }
+          setIsLoading(false);
+        });
       }
-      setIsLoading(false);
     }
 
     // Trigger celebration confetti

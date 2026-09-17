@@ -67,19 +67,40 @@ export async function POST(request: Request) {
         '<p style="font-size: 11px; color: #999; text-align: center;">Vibe Coding Digital Store — E-Books from Real Projects</p>' +
         '</div>';
 
-      const response = await fetch('https://api.resend.com/emails', {
+      let fromAddress = process.env.EMAIL_FROM || 'Vibe Store <onboarding@resend.dev>';
+
+      let response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: 'Bearer ' + resendApiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'Vibe Store <onboarding@resend.dev>',
+          from: fromAddress,
           to: [to],
           subject: '[Vibe Store] ยืนยันการชำระเงินและลิงก์ดาวน์โหลด E-Book (#' + orderId + ')',
           html: emailHtml,
         }),
       });
+
+      // If domain verification is still in progress and custom domain fails, fallback to onboarding@resend.dev
+      if (!response.ok && !fromAddress.includes('onboarding@resend.dev')) {
+        const errorText = await response.text();
+        console.warn('Custom domain send failed, falling back to onboarding@resend.dev. Error was:', errorText);
+        response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + resendApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Vibe Store <onboarding@resend.dev>',
+            to: [to],
+            subject: '[Vibe Store] ยืนยันการชำระเงินและลิงก์ดาวน์โหลด E-Book (#' + orderId + ')',
+            html: emailHtml,
+          }),
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.text();

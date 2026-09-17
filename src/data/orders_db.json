@@ -1,0 +1,37 @@
+﻿[
+  {
+    "id": "ORD-2026-1001",
+    "customerName": "สมชาย นักพัฒนา",
+    "customerEmail": "somchai.dev@example.com",
+    "items": [
+      {
+        "product": {
+          "id": "prod-mediaplayer-01",
+          "title": "E-Book 1: คู่มือพัฒนา Media Player PRO (Cyberpunk Studio Edition)",
+          "slug": "mediaplayer-pro-cyberpunk-guide",
+          "description": "เรียนรู้วิธีสร้างโปรแกรมเครื่องเล่นเพลง MP3 และวิดีโอ MP4 สไตล์ Cyberpunk Studio ด้วย Python 3.12 และ PyQt6",
+          "fullDescription": "",
+          "price": 290,
+          "category": "mediaplayer",
+          "categoryLabel": "งานที่ 1: ฟังเพลง & วิดีโอ",
+          "coverImage": "/products/media_player_pro.png",
+          "rating": 5.0,
+          "reviewsCount": 88,
+          "author": { "name": "Media Player Dev Team", "avatar": "", "role": "PyQt6 Specialist" },
+          "features": [],
+          "fileSize": "48.2 MB",
+          "fileFormat": "PDF E-Book + Source Code",
+          "downloadFileName": "MediaPlayerPRO-Cyberpunk-Guide.pdf"
+        },
+        "quantity": 1
+      }
+    ],
+    "totalAmount": 290,
+    "status": "PAID",
+    "createdAt": "2026-09-16T12:00:00.000Z",
+    "paidAt": "2026-09-16T12:05:00.000Z",
+    "downloadToken": "tok_demo_sample_paid_1001",
+    "downloadExpiresAt": "2026-09-18T12:00:00.000Z",
+    "paymentMethod": "promptpay"
+  }
+]

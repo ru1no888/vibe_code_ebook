@@ -157,6 +157,15 @@ export function createOrder(
   const updatedOrders = [newOrder, ...currentOrders];
   saveToStorage(ORDERS_STORAGE_KEY, updatedOrders);
 
+  // Sync to Central Database (makes orders from mobile show up on admin PC!)
+  if (typeof window !== 'undefined') {
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder),
+    }).catch((err) => console.warn('Central DB sync error:', err));
+  }
+
   return newOrder;
 }
 
@@ -173,6 +182,15 @@ export function updateOrderStatus(orderId: string, status: OrderStatus): Order |
 
   orders[index] = updatedOrder;
   saveToStorage(ORDERS_STORAGE_KEY, orders);
+
+  // Sync status to Central Database
+  if (typeof window !== 'undefined') {
+    fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).catch((err) => console.warn('Central DB status sync error:', err));
+  }
 
   // If status is PAID, automatically generate and log simulated delivery email
   if (status === 'PAID') {
@@ -335,4 +353,26 @@ export function removeFromCart(productId: string): CartItem[] {
 
 export function clearCart(): void {
   saveCart([]);
+}
+
+/**
+ * Fetch an order from the Central Database (used when customer created order on mobile and opens on PC)
+ */
+export async function fetchOrderFromCentralDb(orderId: string): Promise<Order | null> {
+  if (typeof window === 'undefined') return null;
+  try {
+    const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.success && data.order) {
+      const currentOrders = getAllOrders();
+      if (!currentOrders.some((o) => o.id.toUpperCase() === data.order.id.toUpperCase())) {
+        saveToStorage(ORDERS_STORAGE_KEY, [data.order, ...currentOrders]);
+      }
+      return data.order;
+    }
+  } catch (err) {
+    console.warn('fetchOrderFromCentralDb error:', err);
+  }
+  return null;
 }

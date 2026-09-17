@@ -126,6 +126,16 @@ export default function Navbar() {
               >
                 🔍 ติดตามคำสั่งซื้อ
               </Link>
+              <Link
+                href="/admin"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pathname === '/admin'
+                    ? 'bg-[#102a2f] text-white'
+                    : 'text-[#4f6264] hover:bg-[#e8dfd0] hover:text-[#102a2f]'
+                }`}
+              >
+                ⚙️ หลังบ้านแอดมิน
+              </Link>
             </div>
 
             {/* Right Action Buttons */}
@@ -201,6 +211,13 @@ export default function Navbar() {
                 className="block rounded-lg px-3 py-2 text-sm font-bold text-[#334b4f] hover:bg-[#e8dfd0]"
               >
                 🔍 ติดตามสถานะคำสั่งซื้อ
+              </Link>
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-lg px-3 py-2 text-sm font-bold text-[#334b4f] hover:bg-[#e8dfd0]"
+              >
+                ⚙️ ระบบหลังบ้านแอดมิน
               </Link>
               <div className="flex items-center justify-between rounded-lg bg-[#e8e0d0] px-3 py-2 text-xs text-[#4f6264]">
                 <span className="flex items-center gap-1.5 font-medium">

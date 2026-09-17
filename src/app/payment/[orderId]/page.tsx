@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getAuthorizedOrder, getOrderById, updateOrderStatus } from '@/lib/storage';
+import { getAuthorizedOrder, getOrderById, updateOrderStatus, fetchOrderFromCentralDb } from '@/lib/storage';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -41,8 +41,13 @@ function PaymentContent() {
       const found = getAuthorizedOrder(orderId, accessToken) || getOrderById(orderId);
       if (found) {
         setOrder(found);
+        setIsLoading(false);
+      } else {
+        fetchOrderFromCentralDb(orderId).then((dbOrder) => {
+          if (dbOrder) setOrder(dbOrder);
+          setIsLoading(false);
+        });
       }
-      setIsLoading(false);
     }
   }, [orderId, accessToken]);
 
