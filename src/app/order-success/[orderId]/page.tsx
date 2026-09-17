@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getAuthorizedOrder, getSimulatedEmails, canDownload, generateMailtoLink } from '@/lib/storage';
+import { getAuthorizedOrder, getOrderById, getSimulatedEmails, canDownload, generateMailtoLink } from '@/lib/storage';
 import { Order, EmailNotification } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -18,33 +18,44 @@ import {
   FileCheck,
   ShieldCheck,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import SimulatedInboxModal from '@/components/SimulatedInboxModal';
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const params = useParams();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = (params?.orderId as string)?.toUpperCase();
   const accessToken = searchParams.get('token') || '';
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [sentEmail, setSentEmail] = useState<EmailNotification | null>(null);
   const [isInboxOpen, setIsInboxOpen] = useState(false);
 
   useEffect(() => {
     if (orderId) {
-      const found = getAuthorizedOrder(orderId, accessToken);
-      if (found?.status === 'PAID') {
-        setOrder(found);
+      // 1. Try authorized lookup with token first
+      // 2. Fall back to getOrderById from local storage (ensures mobile WebViewer compatibility)
+      const found = getAuthorizedOrder(orderId, accessToken) || getOrderById(orderId);
+      if (found) {
+        if (found.status === 'PAID') {
+          setOrder(found);
 
-        // Find corresponding email
-        const emails = getSimulatedEmails();
-        const matched = emails.find((e) => e.orderId === found.id);
-        if (matched) {
-          setSentEmail(matched);
+          // Find corresponding email
+          const emails = getSimulatedEmails();
+          const matched = emails.find((e) => e.orderId === found.id);
+          if (matched) {
+            setSentEmail(matched);
+          }
+        } else {
+          // If still PENDING, redirect to payment screen so customer can simulate payment
+          router.replace(`/payment/${found.id}?token=${encodeURIComponent(found.downloadToken)}`);
         }
       }
+      setIsLoading(false);
     }
 
     // Trigger celebration confetti
@@ -58,6 +69,15 @@ export default function OrderSuccessPage() {
       // ignore
     }
   }, [orderId, accessToken]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
+        <p className="text-[#102f31] font-semibold text-sm">กำลังโหลดข้อมูลคำสั่งซื้อ {orderId}...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -242,5 +262,18 @@ export default function OrderSuccessPage() {
         onClose={() => setIsInboxOpen(false)}
       />
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
+        <p className="text-[#102f31] font-semibold text-sm">กำลังโหลดข้อมูลคำสั่งซื้อ...</p>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

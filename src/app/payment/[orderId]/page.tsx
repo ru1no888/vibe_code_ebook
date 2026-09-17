@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { getAuthorizedOrder, updateOrderStatus } from '@/lib/storage';
+import { getAuthorizedOrder, getOrderById, updateOrderStatus } from '@/lib/storage';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { 
@@ -21,7 +21,7 @@ import {
   Info
 } from 'lucide-react';
 
-export default function MockPaymentPage() {
+function PaymentContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,16 +29,20 @@ export default function MockPaymentPage() {
   const accessToken = searchParams.get('token') || '';
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(899); // 14:59 minutes
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (orderId) {
-      const found = getAuthorizedOrder(orderId, accessToken);
+      // 1. Try authorized lookup with token first
+      // 2. Fall back to getOrderById from local storage (ensures mobile WebViewer compatibility)
+      const found = getAuthorizedOrder(orderId, accessToken) || getOrderById(orderId);
       if (found) {
         setOrder(found);
       }
+      setIsLoading(false);
     }
   }, [orderId, accessToken]);
 
@@ -90,6 +94,15 @@ export default function MockPaymentPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
+        <p className="text-[#102f31] font-semibold text-sm">กำลังโหลดข้อมูลคำสั่งซื้อ {orderId}...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -255,5 +268,18 @@ export default function MockPaymentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MockPaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
+        <p className="text-[#102f31] font-semibold text-sm">กำลังโหลดระบบชำระเงิน...</p>
+      </div>
+    }>
+      <PaymentContent />
+    </Suspense>
   );
 }
